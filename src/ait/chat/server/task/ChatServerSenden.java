@@ -7,13 +7,14 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class ChatServerSenden implements Runnable{
     private Socket socket;
-    BlkQueue<String> blkQueue;
+    BlkQueue blkQueue;
     List<PrintWriter> printWriters;
-    public ChatServerSenden(Socket socket, BlkQueue<String> blkQueue, List<PrintWriter> printWriters) {
+    public ChatServerSenden(Socket socket, BlkQueue blkQueue, List<PrintWriter> printWriters) {
         this.socket = socket;
         this.blkQueue = blkQueue;
         this.printWriters = printWriters;
@@ -22,15 +23,16 @@ public class ChatServerSenden implements Runnable{
     @Override
     public void run() {
         printWriters = new ArrayList<>();
-        OutputStream outputStream = null;
         try (Socket socket = this.socket) {
-            outputStream = socket.getOutputStream();
+            OutputStream outputStream = socket.getOutputStream();
+            Thread[] threads = new Thread[printWriters.size()];
+            for (int i = 0; i < threads.length; i++) {
+                PrintWriter p = new PrintWriter(outputStream);
+                threads[i] = new Thread(p); // хотелось бы пораздавать адреса для каждого клиента...
+                threads[i].start();
+            }
+
             while (true) {
-//                for (PrintWriter socketWriter: printWriters) {
-//                    socketWriter = new PrintWriter(outputStream);
-//                    socketWriter.println(blkQueue.pop());
-//                    socketWriter.flush();
-//                }
 
             }
         } catch (IOException e) {
